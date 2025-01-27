@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pràctica de Pes i Palanques</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #E69138;
+            margin: 20px;
+            line-height: 1.6;
+            color: #273c43;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #273c43;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+        }
+        input[type="text"], select {
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 10px;
+            width: calc(100% - 20px);
+            box-sizing: border-box;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            transition: border-color 0.3s;
+        }
+        input.correct, select.correct {
+            border-color: #4CAF50;
+        }
+        input.incorrect, select.incorrect {
+            border-color: #FF9800;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+            background: #273c43;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #1f2e35;
+        }
+        .result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            display: none;
+            z-index: 1000;
+        }
+        .banner.success {
+            background-color: #4CAF50;
+        }
+        .banner.partial {
+            background-color: #FF9800;
+        }
+        .banner.error {
+            background-color: #f44336;
+        }
+        footer {
+            margin-top: 20px;
+            background-color: #273c43;
+            text-align: left;
+            padding: 10px;
+            font-size: 12px;
+            color: #ffffff;
+            border-radius: 8px;
+        }
+        #solucionari {
+            margin-top: 20px;
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #273c43;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pràctica de Pes i Palanques</h1>
+        <p>Resol el problema sobre palanques! Respon les tres preguntes correctament.</p>
+
+        <form id="palancaForm">
+            <div id="problema" style="margin-top: 20px;"></div>
+
+            <label for="tipusPalanca">Tipus de palanca:</label>
+            <select id="tipusPalanca">
+                <option value="1r">1r gènere</option>
+                <option value="2n">2n gènere</option>
+                <option value="3r">3r gènere</option>
+            </select>
+
+            <label for="respostaValor">Calcula el valor:</label>
+            <input type="text" id="respostaValor" placeholder="Respon el valor desconegut" required />
+
+            <label for="respostaAM">Calcula l'avantatge mecànic:</label>
+            <input type="text" id="respostaAM" placeholder="Respon l'avantatge mecànic" required />
+
+            <button type="button" onclick="comprovarRespostes()">Comprovar</button>
+        </form>
+
+        <div id="resultat" class="result"></div>
+        <div class="banner" id="banner"></div>
+
+        <div id="solucionari" style="display: none;">
+            <h2>Solucionari</h2>
+            <div id="detallsSolucionari"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Tecnologia i Digitalització 3r d'ESO<br>c2@xtec.cat<br>c2@insmollet.cat</p>
+    </footer>
+
+    <script>
+        const DEBUG = true; // Canvia a false si no vols mostrar les solucions
+
+        // Variable per determinar el mode d'imatges
+        const MODE_IMATGE = "LOCAL"; // Canvia a "ONLINE" per a imatges en línia
+
+        const imatges = MODE_IMATGE === "LOCAL" ? {
+    "1r": "img/p1.png",
+    "2n": "img/p2.png",
+    "3r": "img/p3.png"
+} : {
+    "1r": "https://github.com/aagust11/tec3/blob/main/img/p1.png?raw=true",
+    "2n": "https://github.com/aagust11/tec3/blob/main/img/p2.png?raw=true",
+    "3r": "https://github.com/aagust11/tec3/blob/main/img/p3.png?raw=true"
+};
+
+        let intents = 0;
+
+        const formatDecimal = (valor) => {
+            return valor.toString().replace('.', ',');
+        };
+
+        const generarProblema = () => {
+            intents = 0; // Reiniciar comptador d'intents
+
+            // Netejar inputs
+            document.getElementById("tipusPalanca").value = "";
+            document.getElementById("respostaValor").value = "";
+            document.getElementById("respostaAM").value = "";
+            document.getElementById("tipusPalanca").className = "";
+            document.getElementById("respostaValor").className = "";
+            document.getElementById("respostaAM").className = "";
+
+            const tipusPalanca = ["1r", "2n", "3r"][Math.floor(Math.random() * 3)]; // Tria aleatòria
+            const imgSrc = imatges[tipusPalanca];
+
+            const variables = ["F", "R", "d<sub>F</sub>", "d<sub>R</sub>"];
+            const desconegudaIndex = Math.floor(Math.random() * variables.length);
+            const desconeguda = variables[desconegudaIndex];
+
+            const valors = [];
+            for (let i = 0; i < variables.length; i++) {
+                valors.push(i === desconegudaIndex ? null : parseFloat((Math.random() * 10 + 1).toFixed(2)));
+            }
+
+            let respostaCorrecta;
+
+            if (desconeguda === "F") {
+                respostaCorrecta = valors[1] * valors[3] / valors[2];
+            } else if (desconeguda === "R") {
+                respostaCorrecta = valors[0] * valors[2] / valors[3];
+            } else if (desconeguda === "d<sub>F</sub>") {
+                respostaCorrecta = valors[1] * valors[3] / valors[0];
+            } else {
+                respostaCorrecta = valors[0] * valors[2] / valors[1];
+            }
+
+            const avantatgeMecanic = respostaCorrecta ? valors[2] / (valors[3] || respostaCorrecta) : 0;
+
+            const problema = `
+                <img src="${imgSrc}" alt="Tipus de palanca ${tipusPalanca}" />
+                <table>
+                    <thead>
+                        <tr>
+                            <th>F</th>
+                            <th>R</th>
+                            <th>d<sub>F</sub></th>
+                            <th>d<sub>R</sub></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            ${variables.map((v, i) => i === desconegudaIndex ? `<td>?</td>` : `<td>${formatDecimal(valors[i])} N</td>`).join("")}
+                        </tr>
+                    </tbody>
+                </table>
+                <p>Calcula el valor de: <strong>${desconeguda}</strong></p>
+            `;
+
+            document.getElementById("problema").innerHTML = problema;
+            document.getElementById("problema").dataset.respostaTipusPalanca = tipusPalanca;
+            document.getElementById("problema").dataset.respostaValor = respostaCorrecta.toFixed(2);
+            document.getElementById("problema").dataset.respostaAM = avantatgeMecanic.toFixed(2);
+
+            if (DEBUG) {
+                const solucionariDiv = document.getElementById("solucionari");
+                solucionariDiv.style.display = "block";
+
+                const detallsSolucionari = document.getElementById("detallsSolucionari");
+                detallsSolucionari.innerHTML = `
+                    <p><strong>Tipus de palanca:</strong> ${tipusPalanca}</p>
+                    <p><strong>Valor desconegut (${desconeguda}):</strong> ${formatDecimal(respostaCorrecta)}</p>
+                    <p><strong>Avantatge mecànic:</strong> ${formatDecimal(avantatgeMecanic)}</p>
+                `;
+            }
+        };
+
+        const comprovarRespostes = () => {
+            const tipusPalancaUsuari = document.getElementById("tipusPalanca").value;
+            const respostaValorUsuari = parseFloat(document.getElementById("respostaValor").value.replace(',', '.'));
+            const respostaAMUsuari = parseFloat(document.getElementById("respostaAM").value.replace(',', '.'));
+
+            const tipusPalancaCorrecte = document.getElementById("problema").dataset.respostaTipusPalanca;
+            const respostaCorrectaValor = parseFloat(document.getElementById("problema").dataset.respostaValor);
+            const respostaCorrectaAM = parseFloat(document.getElementById("problema").dataset.respostaAM);
+
+            const banner = document.getElementById("banner");
+            let correcteTipusPalanca = tipusPalancaUsuari === tipusPalancaCorrecte;
+            let correcteValor = Math.abs(respostaValorUsuari - respostaCorrectaValor) / respostaCorrectaValor <= 0.01;
+            let correcteAM = Math.abs(respostaAMUsuari - respostaCorrectaAM) / respostaCorrectaAM <= 0.01;
+
+            document.getElementById("tipusPalanca").className = correcteTipusPalanca ? "correct" : "incorrect";
+            document.getElementById("respostaValor").className = correcteValor ? "correct" : "incorrect";
+            document.getElementById("respostaAM").className = correcteAM ? "correct" : "incorrect";
+
+            const correctes = [correcteTipusPalanca, correcteValor, correcteAM].filter(Boolean).length;
+
+            if (correctes === 3) {
+                banner.innerText = "CORRECTE! Has encertat les tres respostes!";
+                banner.className = "banner success";
+                banner.style.display = "block";
+                setTimeout(() => {
+                    banner.style.display = "none";
+                    generarProblema();
+                }, 2000);
+            } else {
+                intents++;
+                if (intents >= 3) {
+                    banner.innerText = `Has fallat 3 vegades. Les respostes correctes són: Tipus de palanca = ${tipusPalancaCorrecte}, Valor = ${formatDecimal(respostaCorrectaValor)}, AM = ${formatDecimal(respostaCorrectaAM)}.`;
+                    banner.className = "banner error";
+                    banner.style.display = "block";
+                    setTimeout(() => {
+                        banner.style.display = "none";
+                        generarProblema();
+                    }, 4000);
+                } else {
+                    banner.innerText = `Has encertat ${correctes} de 3 respostes. Torna-ho a intentar!`;
+                    banner.className = "banner partial";
+                    banner.style.display = "block";
+                }
+            }
+        };
+
+        window.onload = generarProblema;
+    </script>
+</body>
+</html>
