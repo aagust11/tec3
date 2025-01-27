@@ -1,0 +1,87 @@
+# Informació sobre el projecte "Pràctica de Pes i Palanques"
+
+## Descripció general
+Aquest projecte és una aplicació interactiva per practicar càlculs relacionats amb palanques. Es centra en conceptes com:
+- Tipus de palanques: 1r, 2n, i 3r gènere.
+- Càlcul de forces i distàncies (F, R, dF, dR).
+- Càlcul de l'avantatge mecànic.
+
+L'objectiu principal és proporcionar als alumnes un entorn interactiu per resoldre problemes amb feedback immediat.
+
+---
+
+## Configuració clau
+### Variables importants
+1. **DEBUG**: Determina si es mostra el solucionari des del principi.
+   - `true`: Solucionari visible sempre.
+   - `false`: Solucionari només visible quan es fallen 3 intents.
+
+2. **MODE_IMATGE**: Defineix la ubicació de les imatges.
+   - `"LOCAL"`: Les imatges es carreguen des de la carpeta `img/`.
+   - `"ONLINE"`: Les imatges es carreguen des de GitHub amb rutes com:
+     ```
+     https://github.com/aagust11/tec3/blob/main/Aplicatius/Palanques/img/p1.png?raw=true
+     ```
+
+---
+
+## Processos rellevants
+### Generació de problemes
+1. Els problemes són generats aleatòriament:
+   - Es selecciona el tipus de palanca aleatòriament (1r, 2n, o 3r gènere).
+   - Una de les variables (F, R, dF, dR) es defineix com a desconeguda.
+   - Es calculen els valors restants basats en fórmules físiques.
+
+2. Si la variable desconeguda és F o R, l'avantatge mecànic es calcula com:
+   ```
+   i = dF / dR
+   ```
+   Si és dF o dR, es calcula com:
+   ```
+   i = R / F
+   ```
+
+### Comprovació de respostes
+- Cada resposta introduïda pels usuaris es compara amb la solució correcta.
+- Si l'usuari comet 3 errors, el banner mostra les respostes correctes i un botó per generar un nou problema.
+
+---
+
+## Decissions i ajustos realitzats
+### Rutes d'imatges
+Les imatges s'han configurat per carregar-se de:
+- Mode local: `img/p1.png`, `img/p2.png`, `img/p3.png`.
+- Mode en línia: URLs de GitHub amb `?raw=true` per accedir als fitxers directament.
+
+### Solucionari
+- Quan `DEBUG` és `true`, el solucionari es mostra des del principi.
+- En cas de 3 errors, les respostes correctes es mostren al banner d'errors, incloent:
+  - Tipus de palanca.
+  - Valor desconegut calculat.
+  - Avantatge mecànic.
+
+---
+
+## Decissions futures possibles
+1. Afegir suport per més conceptes avançats com moments o parells de forces.
+2. Permetre l'exportació dels resultats en format PDF.
+3. Integrar més personalització, com carregar imatges específiques per l'usuari.
+
+---
+
+## Informació important per al futur
+1. Els enllaços d'imatges de GitHub han de mantenir el sufix `?raw=true`.
+2. Els càlculs d'avantatge mecànic estan correctament implementats segons les condicions de la variable desconeguda.
+3. El codi depèn de CSS incrustat al fitxer HTML. Si es requereix separar-lo, cal moure'l a un fitxer `style.css`.
+
+## Estat actual del projecte
+- **DEBUG**: `false`
+- **MODE_IMATGE**: `ONLINE`
+- Solucionari correcte i funcional.
+- Sense dependències externes addicionals.
+
+---
+
+## Contacte
+Cap informació personal s'ha afegit al peu de pàgina, però pots substituir-lo amb informació específica si cal.
+
