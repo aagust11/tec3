@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pràctica de Rampa</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #E69138;
+            margin: 20px;
+            line-height: 1.6;
+            color: #273c43;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #273c43;
+        }
+        img {
+            max-width: 50%;
+            display: block;
+            margin: 0 auto;
+        }
+        input[type="text"], select {
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 10px;
+            width: calc(100% - 20px);
+            box-sizing: border-box;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            transition: border-color 0.3s;
+        }
+        input.correct, select.correct {
+            border-color: #4CAF50;
+        }
+        input.incorrect, select.incorrect {
+            border-color: #FF9800;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+            background: #273c43;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #1f2e35;
+        }
+        .result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            display: none;
+            z-index: 1000;
+        }
+        .banner.success {
+            background-color: #4CAF50;
+        }
+        .banner.error {
+            background-color: #f44336;
+        }
+        footer {
+            margin-top: 20px;
+            background-color: #273c43;
+            text-align: left;
+            padding: 10px;
+            font-size: 12px;
+            color: #ffffff;
+            border-radius: 8px;
+        }
+        table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #273c43;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pràctica de Rampa</h1>
+        <p>Resol el problema sobre la rampa! Respon les preguntes correctament.</p>
+
+        <form id="rampaForm">
+            <div id="problema" style="margin-top: 20px;"></div>
+
+            <label for="respostaL">Calcula el valor de l (m):</label>
+            <input type="text" id="respostaL" placeholder="Introdueix el valor de l" required />
+
+            <label for="respostaValor">Calcula el valor desconegut:</label>
+            <input type="text" id="respostaValor" placeholder="Respon el valor desconegut" required />
+
+            <label for="respostaAM">Calcula l'avantatge mecànic:</label>
+            <input type="text" id="respostaAM" placeholder="Respon l'avantatge mecànic" required />
+
+            <button type="button" onclick="comprovarRespostes()">Comprovar</button>
+        </form>
+
+        <div id="resultat" class="result"></div>
+        <div class="banner" id="banner"></div>
+    </div>
+
+    <footer>
+        <p>Tecnologia i Digitalització 3r d'ESO</p>
+    </footer>
+
+    <script>
+        const DEBUG = false;
+        const TOLERANCE = 0.01;
+        const MODE_IMATGE = "LOCAL";
+
+        const rampaImatge = MODE_IMATGE === "LOCAL" ? "img/rampa.png" : "https://github.com/aagust11/tec3/blob/main/Aplicatius/Rampa/img/rampa.png?raw=true";
+
+        const formatDecimal = (valor) => valor.toFixed(2).replace('.', ',');
+
+        let intents = 0;
+
+        // Genera el problema, seleccionant un valor desconegut aleatoriament.
+        const generarProblema = () => {
+            intents = 0;
+
+            document.getElementById("respostaL").value = '';
+            document.getElementById("respostaValor").value = '';
+            document.getElementById("respostaAM").value = '';
+
+            let F = (Math.random() * 50 + 10).toFixed(2); // Força
+            let R = (Math.random() * 100 + 20).toFixed(2); // Resistència
+            let x = (Math.random() * 8 + 2).toFixed(2); // Base de la rampa
+            let h = (Math.random() * 5 + 1).toFixed(2); // Alçada de la rampa
+            let l = Math.sqrt(Math.pow(x, 2) + Math.pow(h, 2)).toFixed(2); // Hipotenusa
+
+            const variables = ["F", "R"]; // Només F i R poden ser desconegudes
+            const desconegudaIndex = Math.floor(Math.random() * variables.length);
+            const desconeguda = variables[desconegudaIndex];
+
+            if (desconeguda === "F") F = "?";
+            if (desconeguda === "R") R = "?";
+            if (desconeguda === "x") x = "?";
+            if (desconeguda === "h") h = "?";
+
+            const avantatgeMecanic = (desconeguda === "F" || desconeguda === "R") ? (l / h).toFixed(2) : (R / F).toFixed(2);
+
+            const problema = `
+                <img src="${rampaImatge}" alt="Imatge d'una rampa" style="width: 50%; display: block; margin: 0 auto;" />
+                <table>
+                    <thead>
+                        <tr>
+                            <th>F (N)</th>
+                            <th>R (N)</th>
+                            <th>x (m)</th>
+                            <th>h (m)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>${F}</td>
+                            <td>${R}</td>
+                            <td>${x}</td>
+                            <td>${h}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById("problema").innerHTML = problema;
+            document.getElementById("problema").dataset.respostaL = l; // Valor correcte de l
+            document.getElementById("problema").dataset.respostaValor =
+                desconeguda === "F" ? (R * h / l).toFixed(2) :
+                desconeguda === "R" ? (F * l / h).toFixed(2) :
+                desconeguda === "x" ? (Math.sqrt(Math.pow(l, 2) - Math.pow(h, 2))).toFixed(2) :
+                (F * l / R).toFixed(2);
+            document.getElementById("problema").dataset.respostaAM = avantatgeMecanic;
+        };
+
+        // Comprova les respostes introduïdes per l'usuari, incloent el valor de l.
+        const comprovarRespostes = () => {
+            const respostaLUsuari = parseFloat(document.getElementById("respostaL").value.replace(',', '.'));
+            const respostaLCorrecta = parseFloat(document.getElementById("problema").dataset.respostaL);
+
+            if (Math.abs(respostaLUsuari - respostaLCorrecta) / respostaLCorrecta > TOLERANCE) {
+                alert(`El valor de l és incorrecte. El correcte era ${formatDecimal(respostaLCorrecta)} m.`);
+                return;
+            }
+
+            const respostaValorUsuari = parseFloat(document.getElementById("respostaValor").value.replace(',', '.'));
+            const respostaAMUsuari = parseFloat(document.getElementById("respostaAM").value.replace(',', '.'));
+
+            const respostaCorrectaValor = parseFloat(document.getElementById("problema").dataset.respostaValor);
+            const respostaCorrectaAM = parseFloat(document.getElementById("problema").dataset.respostaAM);
+
+            const banner = document.getElementById("banner");
+            let correcteValor = Math.abs(respostaValorUsuari - respostaCorrectaValor) / respostaCorrectaValor <= TOLERANCE;
+            let correcteAM = Math.abs(respostaAMUsuari - respostaCorrectaAM) / respostaCorrectaAM <= TOLERANCE;
+
+            document.getElementById("respostaValor").className = correcteValor ? "correct" : "incorrect";
+            document.getElementById("respostaAM").className = correcteAM ? "correct" : "incorrect";
+
+            if (correcteValor && correcteAM) {
+                banner.innerText = "CORRECTE! Has encertat les respostes!";
+                banner.className = "banner success";
+                banner.style.display = "block";
+                setTimeout(() => {
+                    banner.style.display = "none";
+                    generarProblema();
+                }, 2000);
+            } else {
+                intents++;
+                if (intents >= 3) {
+                    banner.innerHTML = `
+                        Has fallat 3 vegades. Les respostes correctes són:<br>
+                        Valor desconegut = ${formatDecimal(respostaCorrectaValor)}, AM = ${formatDecimal(respostaCorrectaAM)}.<br>
+                        Valor de l = ${formatDecimal(respostaLCorrecta)} m.<br>
+                        <button onclick="generarProblema();" style="margin-top: 10px;">Nou exercici</button>
+                    `;
+                    banner.className = "banner error";
+                    banner.style.display = "block";
+                } else {
+                    banner.innerText = `Has fallat alguna resposta. Torna-ho a intentar!`;
+                    banner.className = "banner error";
+                    banner.style.display = "block";
+                }
+            }
+        };
+
+        window.onload = generarProblema;
+    </script>
+</body>
+</html>
