@@ -12,7 +12,6 @@ Aquest projecte consisteix en una aplicació interactiva en HTML, CSS i JavaScri
 
 ## Requisits
 - Navegador web modern amb suport per a JavaScript.
-- Accés a internet si `MODE_IMATGE` està configurat per a utilitzar imatges en línia.
 
 ## Configuració
 - **Variables clau:**
@@ -33,7 +32,7 @@ Aquest projecte consisteix en una aplicació interactiva en HTML, CSS i JavaScri
 ```
 / (directori principal)
 
-|-- index.html (fitxer principal)
+|-- polispast.html (fitxer principal)
 
 |-- /img (carpeta d'imatges locals, si s'escau)
 ```
