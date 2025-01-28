@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pràctica de Polispasts</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #E69138;
+            margin: 20px;
+            line-height: 1.6;
+            color: #273c43;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #273c43;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+        }
+        input[type="text"], select {
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 10px;
+            width: calc(100% - 20px);
+            box-sizing: border-box;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            transition: border-color 0.3s;
+        }
+        input.correct, select.correct {
+            border-color: #4CAF50;
+        }
+        input.incorrect, select.incorrect {
+            border-color: #FF9800;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+            background: #273c43;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #1f2e35;
+        }
+        .result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            display: none;
+            z-index: 1000;
+        }
+        .banner.success {
+            background-color: #4CAF50;
+        }
+        .banner.error {
+            background-color: #f44336;
+        }
+        footer {
+            margin-top: 20px;
+            background-color: #273c43;
+            text-align: left;
+            padding: 10px;
+            font-size: 12px;
+            color: #ffffff;
+            border-radius: 8px;
+        }
+        table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #273c43;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pràctica de Polispasts</h1>
+        <p>Resol el problema sobre polispasts! Respon les dues preguntes correctament.</p>
+
+        <form id="polispastForm">
+            <div id="problema" style="margin-top: 20px;"></div>
+
+            <label for="respostaValor">Calcula el valor desconegut:</label>
+            <input type="text" id="respostaValor" placeholder="Respon el valor desconegut" required />
+
+            <label for="respostaAM">Calcula l'avantatge mecànic:</label>
+            <input type="text" id="respostaAM" placeholder="Respon l'avantatge mecànic" required />
+
+            <button type="button" onclick="comprovarRespostes()">Comprovar</button>
+        </form>
+
+        <div id="resultat" class="result"></div>
+        <div class="banner" id="banner"></div>
+    </div>
+
+    <footer>
+        <p>Tecnologia i Digitalització 3r d'ESO</p>
+    </footer>
+
+    <script>
+        const DEBUG = false;
+        const TOLERANCE = 0.01;
+
+        const formatDecimal = (valor) => {
+            return valor.toFixed(2).replace('.', ',');
+        };
+
+        let intents = 0;
+
+        const generarProblema = () => {
+    console.log("Generant un nou problema...");
+    intents = 0;
+
+    // Neteja els inputs i les seves classes
+    document.getElementById("respostaValor").value = '';
+    document.getElementById("respostaAM").value = '';
+    document.getElementById("respostaValor").className = '';
+    document.getElementById("respostaAM").className = '';
+            console.log("Generant un nou problema...");
+            intents = 0;
+
+            const variables = ["F", "R", "n"];
+            const desconegudaIndex = Math.floor(Math.random() * variables.length);
+            const desconeguda = variables[desconegudaIndex];
+
+            let F = (Math.random() * 50 + 10).toFixed(2); // Força aplicada
+            let n = Math.floor(Math.random() * 6) + 1; // Nombre de politges mòbils
+            let R = (F * 2 * n).toFixed(2); // Resistència
+
+            if (desconeguda === "F") {
+                F = "?";
+            } else if (desconeguda === "R") {
+                R = "?";
+            } else if (desconeguda === "n") {
+                n = "?";
+            }
+
+            const avantatgeMecanic = n !== "?" ? (2 * n) : (R / F);
+
+            console.log(`Desconeguda: ${desconeguda}, F: ${F}, R: ${R}, n: ${n}`);
+
+            const problema = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>F</th>
+                            <th>R</th>
+                            <th>n</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>${F} N</td>
+                            <td>${R} N</td>
+                            <td>${n}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>Calcula el valor de: <strong>${desconeguda}</strong></p>
+            `;
+
+            document.getElementById("problema").innerHTML = problema;
+            document.getElementById("problema").dataset.respostaValor = desconeguda === "F" ? (parseFloat(R) / (2 * parseFloat(n))).toFixed(2) :
+                                                                    desconeguda === "R" ? (parseFloat(F) * 2 * parseFloat(n)).toFixed(2) :
+                                                                    parseFloat(R) / (2 * parseFloat(F));
+            document.getElementById("problema").dataset.respostaAM = avantatgeMecanic.toFixed(2);
+        };
+
+        const comprovarRespostes = () => {
+            console.log("Comprovant respostes...");
+
+            const respostaValorUsuari = parseFloat(document.getElementById("respostaValor").value.replace(',', '.'));
+            const respostaAMUsuari = parseFloat(document.getElementById("respostaAM").value.replace(',', '.'));
+
+            const respostaCorrectaValor = parseFloat(document.getElementById("problema").dataset.respostaValor);
+            const respostaCorrectaAM = parseFloat(document.getElementById("problema").dataset.respostaAM);
+
+            console.log(`Respostes usuari - Valor: ${respostaValorUsuari}, AM: ${respostaAMUsuari}`);
+            console.log(`Respostes correctes - Valor: ${respostaCorrectaValor}, AM: ${respostaCorrectaAM}`);
+
+            const banner = document.getElementById("banner");
+            let correcteValor = Math.abs(respostaValorUsuari - respostaCorrectaValor) / respostaCorrectaValor <= TOLERANCE;
+            let correcteAM = Math.abs(respostaAMUsuari - respostaCorrectaAM) / respostaCorrectaAM <= TOLERANCE;
+
+            document.getElementById("respostaValor").className = correcteValor ? "correct" : "incorrect";
+            document.getElementById("respostaAM").className = correcteAM ? "correct" : "incorrect";
+
+            if (correcteValor && correcteAM) {
+                banner.innerText = "CORRECTE! Has encertat les dues respostes!";
+                banner.className = "banner success";
+                banner.style.display = "block";
+                setTimeout(() => {
+                    banner.style.display = "none";
+                    generarProblema();
+                }, 2000);
+            } else {
+                intents++;
+                if (intents >= 3) {
+                    console.log("3 intents fallits. Mostrant solucions...");
+                    banner.innerHTML = `
+                        Has fallat 3 vegades. Les respostes correctes són:<br>
+                        Valor desconegut = ${formatDecimal(respostaCorrectaValor)}, AM = ${formatDecimal(respostaCorrectaAM)}.<br>
+                        <button onclick="generarProblema(); document.getElementById('banner').style.display = 'none'; document.getElementById('respostaValor').value = ''; document.getElementById('respostaAM').value = ''; document.getElementById('respostaValor').className = ''; document.getElementById('respostaAM').className = '';" style="margin-top: 10px;">Nou exercici</button>
+                    `;
+                    banner.className = "banner error";
+                    banner.style.display = "block";
+                } else {
+                    banner.innerText = `Has fallat alguna resposta. Torna-ho a intentar!`;
+                    banner.className = "banner error";
+                    banner.style.display = "block";
+                }
+            }
+        };
+
+        window.onload = generarProblema;
+    </script>
+</body>
+</html>
