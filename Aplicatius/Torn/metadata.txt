@@ -1,0 +1,67 @@
+# Informació sobre el projecte "Pràctica de Torn"
+
+## Descripció general
+Aquest projecte és una aplicació interactiva per practicar càlculs relacionats amb el torn. Els conceptes principals són:
+- **l**: Longitud de la maneta (m).
+- **r**: Radi del torn (m).
+- **F**: Força aplicada (N).
+- **R**: Resistència (N).
+
+L'aplicació ajuda els alumnes a calcular valors desconeguts i entendre el funcionament del torn, amb feedback immediat i solucionari opcional.
+
+---
+
+## Configuració clau
+1. **DEBUG**:
+   - Si està activat, mostra el solucionari automàticament a sota del problema.
+   - Valors possibles: `true` o `false`.
+2. **TOLERANCE**:
+   - Controla el marge d'error permès en les respostes.
+   - Valor per defecte: `0.01` (1%).
+
+---
+
+## Fórmules implementades
+1. **Avantatge mecànic (AM):**
+   - Si falta `F` o `R`: `AM = l / r`.
+   - Si falta `l` o `r`: `AM = R / F`.
+
+2. **Càlcul del valor desconegut:**
+   - `l = (r * R) / F`
+   - `r = (l * F) / R`
+   - `F = (R * r) / l`
+   - `R = (F * l) / r`
+
+---
+
+## Decissions i ajustos
+### Taula de dades
+- L'ordre de les variables en la taula és: **F, l, R, r**.
+
+### Respostes i tolerància
+- Les respostes es consideren correctes si estan dins del marge definit per `TOLERANCE`.
+
+### Solucionari
+- Si `DEBUG` està activat, es mostren:
+  - El valor desconegut calculat amb la seva unitat.
+  - L'avantatge mecànic calculat.
+
+---
+
+## Futurs ajustos possibles
+1. Afegir gràfics visuals per mostrar el funcionament del torn.
+2. Permetre l'exportació de resultats o informes.
+3. Ampliar la configuració per ajustar el rang de valors generats.
+
+---
+
+## Estat actual del projecte
+- **DEBUG**: `false`
+- **TOLERANCE**: `0.01`
+- Totalment funcional amb feedback i solucionari opcional.
+
+---
+
+## Contacte
+No s'ha inclòs informació de contacte específica, però es pot afegir si cal.
+
