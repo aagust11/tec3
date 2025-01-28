@@ -1,0 +1,67 @@
+
+# Informació sobre el projecte "Pràctica de Polispasts"
+
+## Descripció general
+Aquest projecte és una aplicació interactiva per practicar càlculs relacionats amb polispasts. Es centra en:
+
+- Càlcul de la força aplicada (F), resistència (R) i nombre de politges mòbils (n).
+
+- Càlcul de l'avantatge mecànic amb dues fórmules:
+
+  - `i = 2n` (si n no és desconeguda).
+
+  - `i = R / F` (si n és desconeguda).
+
+L'objectiu principal és proporcionar un entorn interactiu per practicar problemes sobre polispasts amb feedback immediat.
+
+---
+
+## Configuració clau
+
+1. **DEBUG**: Controla si es mostra el solucionari des del principi.
+
+   - Valors possibles: `true` o `false`.
+
+2. **TOLERANCE**: Permet ajustar el marge d'error per a les respostes.
+
+
+---
+
+## Decissions i ajustos
+
+### Fórmules
+
+- Si el desconegut és F, la fórmula usada és `F = R / (2n)`.
+
+- Si el desconegut és R, la fórmula usada és `R = F * 2n`.
+
+- Si el desconegut és n, la fórmula usada és `n = R / (2F)`.
+
+
+### Avantatge mecànic
+
+- Normalment es calcula com `i = 2n`.
+
+- Quan el desconegut és n, s'utilitza `i = R / F`.
+
+### Rutes d'imatges
+
+No s'utilitzen imatges específiques.
+
+---
+
+## Futurs ajustos
+
+- Implementar gràfics dinàmics per mostrar el funcionament del polispast.
+
+- Permetre exportar les respostes correctes per a l'estudi posterior.
+
+
+---
+
+## Estat actual del projecte
+
+- **DEBUG**: `false`.
+
+- **TOLERANCE**: `0.01`.
+
