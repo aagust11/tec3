@@ -92,14 +92,6 @@
             color: #ffffff;
             border-radius: 8px;
         }
-        #solucionari {
-            margin-top: 20px;
-            background-color: #ffffff;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
         table {
             width: 100%;
             margin: 20px 0;
@@ -150,24 +142,23 @@
     </div>
 
     <footer>
-        <p>Tecnologia i Digitalització 3r d'ESO<br>c2@xtec.cat<br>c2@insmollet.cat</p>
+        <p>Tecnologia i Digitalització 3r d'ESO<br>aagust11@xtec.cat<br>angelac@insmollet.cat</p>
     </footer>
 
     <script>
-        const DEBUG = true; // Canvia a false si no vols mostrar les solucions
-
-        // Variable per determinar el mode d'imatges
-        const MODE_IMATGE = "LOCAL"; // Canvia a "ONLINE" per a imatges en línia
+        const DEBUG = false;
+const TOLERANCE = 0.01; // Tolerància per a les respostes
+        const MODE_IMATGE = "ONLINE";
 
         const imatges = MODE_IMATGE === "LOCAL" ? {
-    "1r": "img/p1.png",
-    "2n": "img/p2.png",
-    "3r": "img/p3.png"
-} : {
-    "1r": "https://github.com/aagust11/tec3/blob/main/img/p1.png?raw=true",
-    "2n": "https://github.com/aagust11/tec3/blob/main/img/p2.png?raw=true",
-    "3r": "https://github.com/aagust11/tec3/blob/main/img/p3.png?raw=true"
-};
+            "1r": "img/p1.png",
+            "2n": "img/p2.png",
+            "3r": "img/p3.png"
+        } : {
+            "1r": "https://github.com/aagust11/tec3/blob/main/Aplicatius/Palanques/img/p1.png?raw=true",
+            "2n": "https://github.com/aagust11/tec3/blob/main/Aplicatius/Palanques/img/p2.png?raw=true",
+            "3r": "https://github.com/aagust11/tec3/blob/main/Aplicatius/Palanques/img/p3.png?raw=true"
+        };
 
         let intents = 0;
 
@@ -176,18 +167,15 @@
         };
 
         const generarProblema = () => {
-            intents = 0; // Reiniciar comptador d'intents
+            intents = 0;
 
-            // Netejar inputs
+            document.getElementById("solucionari").style.display = "none";
             document.getElementById("tipusPalanca").value = "";
             document.getElementById("respostaValor").value = "";
             document.getElementById("respostaAM").value = "";
             document.getElementById("tipusPalanca").className = "";
             document.getElementById("respostaValor").className = "";
             document.getElementById("respostaAM").className = "";
-
-            const tipusPalanca = ["1r", "2n", "3r"][Math.floor(Math.random() * 3)]; // Tria aleatòria
-            const imgSrc = imatges[tipusPalanca];
 
             const variables = ["F", "R", "d<sub>F</sub>", "d<sub>R</sub>"];
             const desconegudaIndex = Math.floor(Math.random() * variables.length);
@@ -199,7 +187,6 @@
             }
 
             let respostaCorrecta;
-
             if (desconeguda === "F") {
                 respostaCorrecta = valors[1] * valors[3] / valors[2];
             } else if (desconeguda === "R") {
@@ -210,10 +197,14 @@
                 respostaCorrecta = valors[0] * valors[2] / valors[1];
             }
 
-            const avantatgeMecanic = respostaCorrecta ? valors[2] / (valors[3] || respostaCorrecta) : 0;
+            const avantatgeMecanic = (desconeguda === "F" || desconeguda === "R")
+                ? valors[2] / valors[3]
+                : valors[1] / valors[0];
+
+            const tipusPalanca = determinarTipusPalanca(avantatgeMecanic);
 
             const problema = `
-                <img src="${imgSrc}" alt="Tipus de palanca ${tipusPalanca}" />
+                <img src="${imatges[tipusPalanca]}" alt="Tipus de palanca ${tipusPalanca}" />
                 <table>
                     <thead>
                         <tr>
@@ -225,7 +216,15 @@
                     </thead>
                     <tbody>
                         <tr>
-                            ${variables.map((v, i) => i === desconegudaIndex ? `<td>?</td>` : `<td>${formatDecimal(valors[i])} N</td>`).join("")}
+                            ${variables.map((v, i) => {
+                                if (i === desconegudaIndex) {
+                                    return `<td>?</td>`;
+                                } else if (v === "F" || v === "R") {
+                                    return `<td>${formatDecimal(valors[i])} N</td>`;
+                                } else {
+                                    return `<td>${formatDecimal(valors[i])} m</td>`;
+                                }
+                            }).join("")}
                         </tr>
                     </tbody>
                 </table>
@@ -236,20 +235,19 @@
             document.getElementById("problema").dataset.respostaTipusPalanca = tipusPalanca;
             document.getElementById("problema").dataset.respostaValor = respostaCorrecta.toFixed(2);
             document.getElementById("problema").dataset.respostaAM = avantatgeMecanic.toFixed(2);
+        };
 
-            if (DEBUG) {
-                const solucionariDiv = document.getElementById("solucionari");
-                solucionariDiv.style.display = "block";
-
-                const detallsSolucionari = document.getElementById("detallsSolucionari");
-                detallsSolucionari.innerHTML = `
-                    <p><strong>Tipus de palanca:</strong> ${tipusPalanca}</p>
-                    <p><strong>Valor desconegut (${desconeguda}):</strong> ${formatDecimal(respostaCorrecta)}</p>
-                    <p><strong>Avantatge mecànic:</strong> ${formatDecimal(avantatgeMecanic)}</p>
-                `;
+        const determinarTipusPalanca = (avantatgeMecanic) => {
+            if (avantatgeMecanic === 1) {
+                return "1r";
+            } else if (avantatgeMecanic > 1) {
+                return Math.random() < 0.33 ? "1r" : "2n";
+            } else {
+                return Math.random() < 0.33 ? "1r" : "3r";
             }
         };
 
+        
         const comprovarRespostes = () => {
             const tipusPalancaUsuari = document.getElementById("tipusPalanca").value;
             const respostaValorUsuari = parseFloat(document.getElementById("respostaValor").value.replace(',', '.'));
@@ -281,13 +279,15 @@
             } else {
                 intents++;
                 if (intents >= 3) {
-                    banner.innerText = `Has fallat 3 vegades. Les respostes correctes són: Tipus de palanca = ${tipusPalancaCorrecte}, Valor = ${formatDecimal(respostaCorrectaValor)}, AM = ${formatDecimal(respostaCorrectaAM)}.`;
+                    SOLUCIONS_ERROR = true;
+                    banner.innerHTML = `
+                        Has fallat 3 vegades. Les respostes correctes són:<br>
+                        Tipus de palanca = ${tipusPalancaCorrecte}, Valor = ${formatDecimal(respostaCorrectaValor)}, AM = ${formatDecimal(respostaCorrectaAM)}.<br>
+                        <button onclick="generarProblema(); document.getElementById('banner').style.display = 'none';" style="margin-top: 10px;">Nou exercici</button>
+                    `;
                     banner.className = "banner error";
                     banner.style.display = "block";
-                    setTimeout(() => {
-                        banner.style.display = "none";
-                        generarProblema();
-                    }, 4000);
+                    document.getElementById("mostrarSolucions").style.display = "inline-block";
                 } else {
                     banner.innerText = `Has encertat ${correctes} de 3 respostes. Torna-ho a intentar!`;
                     banner.className = "banner partial";
