@@ -25,11 +25,16 @@ Aquest projecte consisteix en una aplicació interactiva en HTML, CSS i JavaScri
    - Determina si les imatges s'han de carregar localment o en línia.
    - Valors possibles: `"LOCAL"` (carregar des de `img/`), `"ONLINE"` (carregar des de GitHub).
    - **Default**: `"ONLINE"`.
+  
+3. **TOLERÀNCIA**
+   - Determina el valor de tolerància en % que es permet d'error en els càlculs. Determinada com una constant a l'inici.
+   - **Default**: 0.01.
 
 ### Com modificar:
 Edita les variables al principi del fitxer `palanques.html`:
 ```javascript
 const DEBUG = false;
+const TOLERANCE = 0.01;
 const MODE_IMATGE = "ONLINE";
 ```
 
