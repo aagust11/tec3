@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pràctica de Cargol</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #E69138;
+            margin: 20px;
+            line-height: 1.6;
+            color: #273c43;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #273c43;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+        }
+        input[type="text"], select {
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 10px;
+            width: calc(100% - 20px);
+            box-sizing: border-box;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            transition: border-color 0.3s;
+        }
+        input.correct, select.correct {
+            border-color: #4CAF50;
+        }
+        input.incorrect, select.incorrect {
+            border-color: #FF9800;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+            background: #273c43;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #1f2e35;
+        }
+        .result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            display: none;
+            z-index: 1000;
+        }
+        .banner.success {
+            background-color: #4CAF50;
+        }
+        .banner.error {
+            background-color: #f44336;
+        }
+        footer {
+            margin-top: 20px;
+            background-color: #273c43;
+            text-align: left;
+            padding: 10px;
+            font-size: 12px;
+            color: #ffffff;
+            border-radius: 8px;
+        }
+        table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #273c43;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pràctica de Cargol</h1>
+        <p>Resol el problema sobre el cargol! Respon les dues preguntes correctament.</p>
+        <p><strong>Nota:</strong> Assegura't de tenir en compte les unitats: <strong>l</strong> en cm i <strong>p</strong> en mm.</p>
+
+        <form id="cargolForm">
+            <div id="problema" style="margin-top: 20px;"></div>
+
+            <label for="respostaValor">Calcula el valor desconegut:</label>
+            <input type="text" id="respostaValor" placeholder="Respon el valor desconegut" required />
+
+            <label for="respostaAM">Calcula l'avantatge mecànic:</label>
+            <input type="text" id="respostaAM" placeholder="Respon l'avantatge mecànic" required />
+
+            <button type="button" onclick="comprovarRespostes()">Comprovar</button>
+        </form>
+
+        <div id="resultat" class="result"></div>
+        <div class="banner" id="banner"></div>
+    </div>
+
+    <footer>
+        <p>Tecnologia i Digitalització 3r d'ESO<br>aagust11@xtec.cat<br>angelac@insmollet.cat</p>
+    </footer>
+
+    <script>
+        const DEBUG = false;
+        const TOLERANCE = 0.01;
+        const MODE_IMATGE = "ONLINE";
+
+        const cargolIMAGE = MODE_IMATGE === "LOCAL" ? "img/cargol.png" : "https://github.com/aagust11/tec3/blob/main/Aplicatius/Cargol/img/cargol.png?raw=true";
+
+
+        const formatDecimal = (valor) => {
+            return valor.toFixed(2).replace('.', ',');
+        };
+
+        let intents = 0;
+
+        const generarProblema = () => {
+        console.log("Generant un nou problema...");
+        intents = 0;
+
+        document.getElementById("respostaValor").value = '';
+        document.getElementById("respostaAM").value = '';
+        document.getElementById("respostaValor").className = '';
+        document.getElementById("respostaAM").className = '';
+
+        const variables = ["F", "R", "l", "p"];
+        const desconegudaIndex = Math.floor(Math.random() * variables.length);
+        const desconeguda = variables[desconegudaIndex];
+
+        let F = (Math.random() * 50 + 10).toFixed(2); // Força aplicada (N)
+        let l = (Math.random() * 33 + 7).toFixed(2);  // Longitud de la clau (cm) entre 7 i 40 cm
+        let p = Math.floor(Math.random() * 8) + 1;    // Pas de rosca (mm), enter entre 1 i 8 mm
+
+        let R = Math.floor((F * 2 * Math.PI * l * 10) / p); // Ajustat al nou rang i fórmula
+        if (R < 2000) R += 2000; // Ajust perquè sigui més gran
+        if (R > 4500000) R = 4500000; // Límit superior
+
+        if (desconeguda === "F") {
+            F = "?";
+        } else if (desconeguda === "R") {
+            R = "?";
+        } else if (desconeguda === "l") {
+            l = "?";
+        } else if (desconeguda === "p") {
+            p = "?";
+        }
+
+        //const avantatgeMecanic = (2 * Math.PI * parseFloat(l) * 10 / parseFloat(p)).toFixed(2);
+        const avantatgeMecanic = (desconeguda === "F" || desconeguda === "R")
+        ?  (2 * Math.PI * parseFloat(l) * 10 / parseFloat(p)).toFixed(2)
+        :(parseFloat(R) / parseFloat(F)).toFixed(2);
+
+        const problema = `
+        <img src="${rampaImatge}" alt="Imatge d'una rampa" style="width: 50%; display: block; margin: 0 auto;" />
+            <table>
+                <thead>
+                    <tr>
+                        <th>F (N)</th>
+                        <th>R (N)</th>
+                        <th>l (cm)</th>
+                        <th>p (mm)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>${F}</td>
+                        <td>${R}</td>
+                        <td>${l}</td>
+                        <td>${p}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>Calcula el valor de: <strong>${desconeguda}</strong></p>
+        `;
+
+        document.getElementById("problema").innerHTML = problema;
+        document.getElementById("problema").dataset.respostaValor = desconeguda === "F" 
+            ? ((parseFloat(R) * parseFloat(p)) / (2 * Math.PI * parseFloat(l) * 10)).toFixed(2)
+            : desconeguda === "R" 
+            ? ((parseFloat(F) * 2 * Math.PI * parseFloat(l) * 10) / parseFloat(p)).toFixed(2)
+            : desconeguda === "l" 
+            ? ((parseFloat(R) * parseFloat(p)) / (2 * Math.PI * parseFloat(F) * 10)).toFixed(2)
+            : ((parseFloat(F) * 2 * Math.PI * parseFloat(l) * 10) / parseFloat(R)).toFixed(2);
+        document.getElementById("problema").dataset.respostaAM = avantatgeMecanic;
+    };
+
+    window.onload = generarProblema;
+
+        const comprovarRespostes = () => {
+            console.log("Comprovant respostes...");
+
+            const respostaValorUsuari = parseFloat(document.getElementById("respostaValor").value.replace(',', '.'));
+            const respostaAMUsuari = parseFloat(document.getElementById("respostaAM").value.replace(',', '.'));
+
+            const respostaCorrectaValor = parseFloat(document.getElementById("problema").dataset.respostaValor);
+            const respostaCorrectaAM = parseFloat(document.getElementById("problema").dataset.respostaAM);
+
+            console.log(`Respostes usuari - Valor: ${respostaValorUsuari}, AM: ${respostaAMUsuari}`);
+            console.log(`Respostes correctes - Valor: ${respostaCorrectaValor}, AM: ${respostaCorrectaAM}`);
+
+            const banner = document.getElementById("banner");
+            let correcteValor = Math.abs(respostaValorUsuari - respostaCorrectaValor) / respostaCorrectaValor <= TOLERANCE;
+            let correcteAM = Math.abs(respostaAMUsuari - respostaCorrectaAM) / respostaCorrectaAM <= 2*TOLERANCE; //Acceptem més tolerància a l'AM degut a l'ús del pi en els càlculs i els possibles arrodoniments fets en el desenvolupament
+
+            document.getElementById("respostaValor").className = correcteValor ? "correct" : "incorrect";
+            document.getElementById("respostaAM").className = correcteAM ? "correct" : "incorrect";
+
+            if (correcteValor && correcteAM) {
+                banner.innerText = "CORRECTE! Has encertat les dues respostes!";
+                banner.className = "banner success";
+                banner.style.display = "block";
+                setTimeout(() => {
+                    banner.style.display = "none";
+                    generarProblema();
+                }, 2000);
+            } else {
+                intents++;
+                if (intents >= 3) {
+                    console.log("3 intents fallits. Mostrant solucions...");
+                    banner.innerHTML = `
+                        Has fallat 3 vegades. Les respostes correctes són:<br>
+                        Valor desconegut = ${formatDecimal(respostaCorrectaValor)}, AM = ${formatDecimal(respostaCorrectaAM)}.<br>
+                        <button onclick="generarProblema(); document.getElementById('banner').style.display = 'none'; document.getElementById('respostaValor').value = ''; document.getElementById('respostaAM').value = ''; document.getElementById('respostaValor').className = ''; document.getElementById('respostaAM').className = '';" style="margin-top: 10px;">Nou exercici</button>
+                    `;
+                    banner.className = "banner error";
+                    banner.style.display = "block";
+                } else {
+                    banner.innerText = `Has fallat alguna resposta. Torna-ho a intentar!`;
+                    banner.className = "banner error";
+                    banner.style.display = "block";
+                }
+            }
+        };
+
+        window.onload = generarProblema;
+    </script>
+</body>
+</html>
